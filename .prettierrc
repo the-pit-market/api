@@ -2,7 +2,7 @@
   "tabWidth": 2,
   "useTabs": false,
   "jsxSingleQuote": false,
-  "arrowParens": "always",
+  "arrowParens": "avoid",
   "singleQuote": true,
   "semi": true,
   "quoteProps": "as-needed",
