@@ -12,7 +12,7 @@ export class UserService {
   @Inject('DB_CLIENT')
   private readonly client!: DynamoDBDocumentClient;
 
-  async getUser(uuid: string): Promise<User | null> {
+  async getOne(uuid: string): Promise<User | null> {
     const getUserCmd = new QueryCommand({
       TableName: THE_PIT_EXCHANGE_TABLE,
       KeyConditionExpression: 'PK = :pk and SK = :sk',
@@ -39,13 +39,13 @@ export class UserService {
     }
   }
 
-  async insertUser(user: User) {
+  async insertOne(user: User) {
     const insertUserCmd = new PutCommand({
       TableName: THE_PIT_EXCHANGE_TABLE,
       Item: {
         PK: user.uuid,
         SK: 'METADATA',
-        user
+        ...user
       }
     });
 
