@@ -7,6 +7,7 @@ import { Express } from 'express-serve-static-core';
 import 'reflect-metadata';
 import { buildSchema } from 'type-graphql';
 import { GraphqlContext } from './context';
+import { Container } from 'typedi';
 
 const PORT = 4000;
 
@@ -15,8 +16,11 @@ const PORT = 4000;
  * @param app The express application to apply the middleware to.
  */
 async function bootstrapApolloServer(app: Express, db: DynamoDBClient) {
+  Container.set('DB_CLIENT', db);
+
   const schema = await buildSchema({
-    resolvers: [__dirname + '/graphql/**/*.resolver.{ts,js}']
+    resolvers: [__dirname + '/graphql/**/*.resolver.{ts,js}'],
+    container: Container
   });
 
   const server = new ApolloServer({
@@ -26,6 +30,8 @@ async function bootstrapApolloServer(app: Express, db: DynamoDBClient) {
 
   await server.start();
   server.applyMiddleware({ app, path: '/graphql' });
+
+  return app;
 }
 
 /**
@@ -38,10 +44,10 @@ async function createDynamoDBClient(region = 'us-west-2') {
 }
 
 async function main() {
-  const app = express();
+  let app = express();
   app.use(cors());
 
-  await bootstrapApolloServer(app, await createDynamoDBClient());
+  app = await bootstrapApolloServer(app, await createDynamoDBClient());
 
   app.listen(PORT, () => {
     console.log(
